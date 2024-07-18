@@ -45,6 +45,8 @@ import {
 } from "@/api";
 import { License } from "@/types/license";
 import { CustomCard } from '@/components/custom-card';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const columns = [
   { name: "LICENSE", uid: "id", sortable: true },
@@ -117,7 +119,6 @@ export default function LicenseTable() {
   }, [licenses, account, network]);
 
   const getLicensesData = async () => {
-    console.log("refresh");
     const licenses = await getLicenses(network, "license", account);
 
     setLicenses(licenses);
@@ -131,7 +132,14 @@ export default function LicenseTable() {
       licenseList,
     );
 
-    await provider.send("eth_sendTransaction", [transaction]);
+    await toast.promise(
+      provider.send("eth_sendTransaction", [transaction]),
+      {
+        pending: 'Claiming rewards',
+        success: 'Rewards successfully claimed 👌',
+        error: 'Something went wrong. Please try again 🤯'
+      }
+    );
   };
 
   const buyLicense = async () => {
@@ -142,7 +150,14 @@ export default function LicenseTable() {
       licensesAmount,
     );
 
-    await provider.send("eth_sendTransaction", [transaction]);
+    await toast.promise(
+      provider.send("eth_sendTransaction", [transaction]),
+      {
+        pending: 'Buying license',
+        success: 'License successfully bought 👌',
+        error: 'Something went wrong. Please try again 🤯'
+      }
+    );
   };
 
   const registerLicense = async () => {
@@ -154,7 +169,14 @@ export default function LicenseTable() {
       nodeHash,
     );
 
-    await provider.send("eth_sendTransaction", [transaction]);
+    await toast.promise(
+      provider.send("eth_sendTransaction", [transaction]),
+      {
+        pending: 'Register license',
+        success: 'License successfully registered 👌',
+        error: 'Something went wrong. Please try again 🤯'
+      }
+    );
   };
 
   const renderCell = React.useCallback(

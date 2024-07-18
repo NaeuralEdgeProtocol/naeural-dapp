@@ -99,8 +99,6 @@ export const getEstimateRewards = async (
     queryParams.append(`licenses[${index}]`, JSON.stringify(license));
   });
 
-  console.log(queryParams.toString());
-
   const response = await fetch(
     process.env.NEXT_PUBLIC_GATEWAY_URL +
       `/rewards/estimate/${network}/${contractType}/?${queryParams.toString()}`,

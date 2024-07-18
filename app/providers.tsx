@@ -7,6 +7,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ThemeProviderProps } from "next-themes/dist/types";
 import { NetworkProvider } from '@/context/network-provider';
 import { MetaMaskProvider } from '@metamask/sdk-react';
+import { ToastContainer } from 'react-toastify';
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -32,6 +33,10 @@ export function Providers({ children, themeProps }: ProvidersProps) {
       <MetaMaskProvider debug={false} sdkOptions={sdkOptions}>
         <NextUIProvider navigate={router.push}>
           <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
+          <ToastContainer
+            position="bottom-right"
+            theme="dark"
+          />
         </NextUIProvider>
       </MetaMaskProvider>
     </NetworkProvider>
