@@ -49,7 +49,7 @@ export default function Home() {
     return (
       <>
         <div className="flex items-center justify-center gap-3">
-          <CustomCard icon={<Logo />} value={naeuralBalance} subvalue={naeuralBalance * naeuralPrice} title="NAEURAL Balance" />
+          <CustomCard icon={<Logo />} value={naeuralBalance} subvalue={(naeuralBalance * naeuralPrice).toFixed(3)} title="NAEURAL Balance" />
           <CustomCard icon={<EthIcon />} value={ethBalance} title="ETH Balance" />
           <CustomCard icon={<HourglassIcon />} value={currentEpoch} title="Current Epoch" />
         </div>

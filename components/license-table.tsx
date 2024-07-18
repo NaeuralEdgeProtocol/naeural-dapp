@@ -33,7 +33,7 @@ import {
   PlusIcon,
   PublicLicenseIcon,
   MasterLicenseIcon,
-  VerticalDotsIcon, EthIcon,
+  VerticalDotsIcon, EthIcon, Logo,
 } from '@/components/icons';
 import {
   getAddLicenseTransaction,
@@ -125,11 +125,18 @@ export default function LicenseTable() {
   };
 
   const claimRewards = async (licenseList: License[]) => {
-    const transaction = await getClaimRewardsTransaction(
-      network,
-      "license",
-      account,
-      licenseList,
+    const transaction = await toast.promise(
+      getClaimRewardsTransaction(
+        network,
+        "license",
+        account,
+        licenseList,
+      ),
+      {
+        pending: 'Preparing transaction...',
+        success: 'Transaction prepared 👌',
+        error: 'Failed to prepare transaction 🤯'
+      }
     );
 
     await toast.promise(
@@ -143,11 +150,18 @@ export default function LicenseTable() {
   };
 
   const buyLicense = async () => {
-    const transaction = await getAddLicenseTransaction(
-      network,
-      "license",
-      account,
-      licensesAmount,
+    const transaction = await toast.promise(
+      getAddLicenseTransaction(
+        network,
+        "license",
+        account,
+        licensesAmount,
+      ),
+      {
+        pending: 'Preparing transaction...',
+        success: 'Transaction prepared 👌',
+        error: 'Failed to prepare transaction 🤯'
+      }
     );
 
     await toast.promise(
@@ -161,12 +175,19 @@ export default function LicenseTable() {
   };
 
   const registerLicense = async () => {
-    const transaction = await getRegisterLicenseTransaction(
-      network,
-      "license",
-      account,
-      selectedLicense?.id,
-      nodeHash,
+    const transaction = await toast.promise(
+      getRegisterLicenseTransaction(
+        network,
+        "license",
+        account,
+        selectedLicense?.id,
+        nodeHash,
+      ),
+      {
+        pending: 'Preparing transaction...',
+        success: 'Transaction prepared 👌',
+        error: 'Failed to prepare transaction 🤯'
+      }
     );
 
     await toast.promise(
@@ -385,10 +406,10 @@ export default function LicenseTable() {
                       {selectedLicense.nodeHash || 'Not assigned'}
                     </Snippet>
                     <div className="flex">
-                      <CustomCard icon={<EthIcon />} value={selectedLicense.currentClaimAmount} title="Redeemed" />
+                      <CustomCard icon={<Logo />} value={selectedLicense.currentClaimAmount} title="Redeemed" />
                     </div>
                     <div className="flex">
-                      <CustomCard icon={<EthIcon />} value={selectedLicense.remainingClaimAmount} title="Remaining" />
+                      <CustomCard icon={<Logo />} value={selectedLicense.remainingClaimAmount} title="Remaining" />
                     </div>
                   </>
                 )}
