@@ -33,8 +33,10 @@ import {
   PlusIcon,
   PublicLicenseIcon,
   MasterLicenseIcon,
-  VerticalDotsIcon, EthIcon, Logo,
-} from '@/components/icons';
+  VerticalDotsIcon,
+  EthIcon,
+  Logo,
+} from "@/components/icons";
 import {
   getAddLicenseTransaction,
   getClaimRewardsTransaction,
@@ -44,9 +46,9 @@ import {
   getRegisterLicenseTransaction,
 } from "@/api";
 import { License } from "@/types/license";
-import { CustomCard } from '@/components/custom-card';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { CustomCard } from "@/components/custom-card";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const columns = [
   { name: "LICENSE", uid: "id", sortable: true },
@@ -103,6 +105,9 @@ export default function LicenseTable() {
 
   useEffect(() => {
     const fetchRewards = async () => {
+      if (!account) {
+        return;
+      }
       for (const license of licenses) {
         license.estimateRewards = await getEstimateRewards(
           network,
@@ -126,52 +131,36 @@ export default function LicenseTable() {
 
   const claimRewards = async (licenseList: License[]) => {
     const transaction = await toast.promise(
-      getClaimRewardsTransaction(
-        network,
-        "license",
-        account,
-        licenseList,
-      ),
+      getClaimRewardsTransaction(network, "license", account, licenseList),
       {
-        pending: 'Preparing transaction...',
-        success: 'Transaction prepared 👌',
-        error: 'Failed to prepare transaction 🤯'
-      }
+        pending: "Preparing transaction...",
+        success: "Transaction prepared 👌",
+        error: "Failed to prepare transaction 🤯",
+      },
     );
 
-    await toast.promise(
-      provider.send("eth_sendTransaction", [transaction]),
-      {
-        pending: 'Claiming rewards',
-        success: 'Rewards successfully claimed 👌',
-        error: 'Something went wrong. Please try again 🤯'
-      }
-    );
+    await toast.promise(provider.send("eth_sendTransaction", [transaction]), {
+      pending: "Claiming rewards",
+      success: "Rewards successfully claimed 👌",
+      error: "Something went wrong. Please try again 🤯",
+    });
   };
 
   const buyLicense = async () => {
     const transaction = await toast.promise(
-      getAddLicenseTransaction(
-        network,
-        "license",
-        account,
-        licensesAmount,
-      ),
+      getAddLicenseTransaction(network, "license", account, licensesAmount),
       {
-        pending: 'Preparing transaction...',
-        success: 'Transaction prepared 👌',
-        error: 'Failed to prepare transaction 🤯'
-      }
+        pending: "Preparing transaction...",
+        success: "Transaction prepared 👌",
+        error: "Failed to prepare transaction 🤯",
+      },
     );
 
-    await toast.promise(
-      provider.send("eth_sendTransaction", [transaction]),
-      {
-        pending: 'Buying license',
-        success: 'License successfully bought 👌',
-        error: 'Something went wrong. Please try again 🤯'
-      }
-    );
+    await toast.promise(provider.send("eth_sendTransaction", [transaction]), {
+      pending: "Buying license",
+      success: "License successfully bought 👌",
+      error: "Something went wrong. Please try again 🤯",
+    });
   };
 
   const registerLicense = async () => {
@@ -184,20 +173,17 @@ export default function LicenseTable() {
         nodeHash,
       ),
       {
-        pending: 'Preparing transaction...',
-        success: 'Transaction prepared 👌',
-        error: 'Failed to prepare transaction 🤯'
-      }
+        pending: "Preparing transaction...",
+        success: "Transaction prepared 👌",
+        error: "Failed to prepare transaction 🤯",
+      },
     );
 
-    await toast.promise(
-      provider.send("eth_sendTransaction", [transaction]),
-      {
-        pending: 'Register license',
-        success: 'License successfully registered 👌',
-        error: 'Something went wrong. Please try again 🤯'
-      }
-    );
+    await toast.promise(provider.send("eth_sendTransaction", [transaction]), {
+      pending: "Register license",
+      success: "License successfully registered 👌",
+      error: "Something went wrong. Please try again 🤯",
+    });
   };
 
   const renderCell = React.useCallback(
@@ -403,13 +389,21 @@ export default function LicenseTable() {
                       <strong>License ID:</strong> #{selectedLicense.id}
                     </p>
                     <Snippet size="sm" symbol="">
-                      {selectedLicense.nodeHash || 'Not assigned'}
+                      {selectedLicense.nodeHash || "Not assigned"}
                     </Snippet>
                     <div className="flex">
-                      <CustomCard icon={<Logo />} value={selectedLicense.currentClaimAmount} title="Redeemed" />
+                      <CustomCard
+                        icon={<Logo />}
+                        value={selectedLicense.currentClaimAmount}
+                        title="Redeemed"
+                      />
                     </div>
                     <div className="flex">
-                      <CustomCard icon={<Logo />} value={selectedLicense.remainingClaimAmount} title="Remaining" />
+                      <CustomCard
+                        icon={<Logo />}
+                        value={selectedLicense.remainingClaimAmount}
+                        title="Remaining"
+                      />
                     </div>
                   </>
                 )}

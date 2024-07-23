@@ -56,5 +56,8 @@
 		"tailwind-variants": "0.1.20",
 		"tailwindcss": "3.4.3",
 		"typescript": "5.0.4"
+	},
+	"devDependencies": {
+		"prettier": "^3.3.3"
 	}
 }
