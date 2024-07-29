@@ -8,4 +8,5 @@ export interface License {
   currentClaimAmount: string;
   remainingClaimAmount: string;
   currentClaimableCycles: string | undefined;
+  nodePower: string | undefined;
 }

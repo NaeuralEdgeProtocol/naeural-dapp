@@ -36,6 +36,7 @@ import {
   VerticalDotsIcon,
   EthIcon,
   Logo,
+  PowerIcon,
 } from "@/components/icons";
 import {
   getAddLicenseTransaction,
@@ -49,6 +50,8 @@ import { License } from "@/types/license";
 import { CustomCard } from "@/components/custom-card";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Chip } from "@nextui-org/chip";
+import { FiChevronsUp } from "react-icons/fi";
 
 const columns = [
   { name: "LICENSE", uid: "id", sortable: true },
@@ -108,14 +111,19 @@ export default function LicenseTable() {
       if (!account) {
         return;
       }
+      const newRewards = {};
       for (const license of licenses) {
-        license.estimateRewards = await getEstimateRewards(
+        const reward = await getEstimateRewards(
           network,
           "license",
           account,
           licenses,
         );
+
+        newRewards[license.id] = reward;
       }
+
+      setRewards(newRewards);
     };
 
     if (account && licenses.length > 0) {
@@ -124,26 +132,59 @@ export default function LicenseTable() {
   }, [licenses, account, network]);
 
   const getLicensesData = async () => {
+    const masterLicenses = await getLicenses(network, "master", account);
     const licenses = await getLicenses(network, "license", account);
 
-    setLicenses(licenses);
+    setLicenses([...masterLicenses, ...licenses]);
   };
 
   const claimRewards = async (licenseList: License[]) => {
-    const transaction = await toast.promise(
-      getClaimRewardsTransaction(network, "license", account, licenseList),
-      {
-        pending: "Preparing transaction...",
-        success: "Transaction prepared 👌",
-        error: "Failed to prepare transaction 🤯",
-      },
-    );
+    const masterLicenses = [];
+    const publicLicenses = [];
+    for (const license of licenseList) {
+      if (license.type === "license") {
+        publicLicenses.push(license);
+      } else {
+        masterLicenses.push(license);
+      }
+    }
 
-    await toast.promise(provider.send("eth_sendTransaction", [transaction]), {
-      pending: "Claiming rewards",
-      success: "Rewards successfully claimed 👌",
-      error: "Something went wrong. Please try again 🤯",
-    });
+    if (masterLicenses.length > 0) {
+      const masterTransaction = await toast.promise(
+        getClaimRewardsTransaction(network, "master", account, licenseList),
+        {
+          pending: "Preparing transaction...",
+          success: "Transaction prepared 👌",
+          error: "Failed to prepare transaction 🤯",
+        },
+      );
+
+      await toast.promise(
+        provider.send("eth_sendTransaction", [masterTransaction]),
+        {
+          pending: "Claiming master rewards",
+          success: "Rewards successfully claimed 👌",
+          error: "Something went wrong. Please try again 🤯",
+        },
+      );
+    }
+
+    if (publicLicenses.length > 0) {
+      const transaction = await toast.promise(
+        getClaimRewardsTransaction(network, "license", account, licenseList),
+        {
+          pending: "Preparing transaction...",
+          success: "Transaction prepared 👌",
+          error: "Failed to prepare transaction 🤯",
+        },
+      );
+
+      await toast.promise(provider.send("eth_sendTransaction", [transaction]), {
+        pending: "Claiming rewards",
+        success: "Rewards successfully claimed 👌",
+        error: "Something went wrong. Please try again 🤯",
+      });
+    }
   };
 
   const buyLicense = async () => {
@@ -167,7 +208,7 @@ export default function LicenseTable() {
     const transaction = await toast.promise(
       getRegisterLicenseTransaction(
         network,
-        "license",
+        selectedLicense?.type,
         account,
         selectedLicense?.id,
         nodeHash,
@@ -202,9 +243,18 @@ export default function LicenseTable() {
                     <PublicLicenseIcon />
                   )}
                 </div>
-                <h3 className="tracking-tight text-lg inline font-semibold">
-                  #{license.id}
-                </h3>
+                #{license.id}
+                {license.nodePower && (
+                  <Chip
+                    className="ml-2"
+                    size="sm"
+                    startContent={<FiChevronsUp />}
+                    variant="faded"
+                    color="success"
+                  >
+                    {license.nodePower}x
+                  </Chip>
+                )}
               </div>
             </>
           );
@@ -234,7 +284,9 @@ export default function LicenseTable() {
         case "estimateRewards":
           return (
             <div>
-              {rewards[license.id] || (
+              {license.id in rewards ? (
+                rewards[license.id]
+              ) : (
                 <Skeleton className="w-2/5 rounded-lg">
                   <div className="h-3 w-2/5 rounded-lg bg-default-300" />
                 </Skeleton>
@@ -261,7 +313,7 @@ export default function LicenseTable() {
                   </DropdownItem>
                   <DropdownItem
                     onClick={() => {
-                      claimRewards([license]);
+                      claimRewards([license], license.type);
                     }}
                   >
                     Claim Rewards

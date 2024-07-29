@@ -1,4 +1,4 @@
-import { License } from '@/types/license';
+import { License } from "@/types/license";
 
 export const getLicensePrice = async (
   network: string,
@@ -12,7 +12,10 @@ export const getLicensePrice = async (
   return await response.json();
 };
 
-export const getAccountData = async (network: string, address: string): Promise<any> => {
+export const getAccountData = async (
+  network: string,
+  address: string,
+): Promise<any> => {
   const response = await fetch(
     process.env.NEXT_PUBLIC_GATEWAY_URL +
       `/accounts/${network}/?address=${address}`,
@@ -43,10 +46,9 @@ export const getClaimRewardsTransaction = async (
   const queryParams = new URLSearchParams();
 
   queryParams.append("address", address);
+
   licenseList.forEach((license, index) => {
-    Object.keys(license).forEach(key => {
-      queryParams.append(`licenses[${index}].${key}`, license[key]);
-    });
+    queryParams.append(`licenses[${index}]`, JSON.stringify(license));
   });
 
   const response = await fetch(

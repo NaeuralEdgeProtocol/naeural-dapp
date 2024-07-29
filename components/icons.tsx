@@ -680,6 +680,30 @@ export const PublicLicenseIcon: React.FC<IconSvgProps> = ({
   </svg>
 );
 
+export const PowerIcon: React.FC<IconSvgProps> = ({
+  size = 24,
+  width,
+  height,
+  ...props
+}) => (
+  <svg
+    aria-hidden="true"
+    className="text-pink-500"
+    fill="none"
+    focusable="false"
+    height={size || height}
+    role="presentation"
+    viewBox="0 0 24 24"
+    width={size || width}
+    {...props}
+  >
+    <path
+      fill="#000000"
+      d="M256 29.816l-231 154v106.368l231-154 231 154V183.816zm0 128.043L105 259.783v90.283l151-101.925 151 101.925v-90.283zm0 112l-87 58.725v67.6l87-58 87 58v-67.6zm0 89.957l-87 58v64.368l87-58 87 58v-64.368z"
+    />
+  </svg>
+);
+
 export const MasterLicenseIcon: React.FC<IconSvgProps> = ({
   size = 24,
   width,
