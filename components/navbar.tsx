@@ -35,16 +35,15 @@ import {
   Logo,
   WalletIcon,
   MetamaskIcon,
-} from '@/components/icons';
-import { IconWrapper } from '@/components/icon-wrapper';
-import { ListboxWrapper } from '@/components/listbox-wrapper';
-import { ConnectWalletButton } from '@/components/connect-wallet';
-import { MetaMaskProvider } from '@metamask/sdk-react';
+} from "@/components/icons";
+import { IconWrapper } from "@/components/icon-wrapper";
+import { ListboxWrapper } from "@/components/listbox-wrapper";
+import { ConnectWalletButton } from "@/components/connect-wallet";
+import { MetaMaskProvider } from "@metamask/sdk-react";
 import { formatAddress } from "../lib/utils";
 
-
 export const Navbar = () => {
-  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const searchInput = (
     <Input
@@ -73,7 +72,9 @@ export const Navbar = () => {
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
-            <Logo />
+            <div>
+              <Logo />
+            </div>
             <p className="font-bold text-inherit">NAEURAL</p>
           </NextLink>
         </NavbarBrand>
@@ -100,7 +101,7 @@ export const Navbar = () => {
         justify="end"
       >
         <NavbarItem className="hidden sm:flex gap-2">
-          <Link isExternal aria-label="Twitter" href={siteConfig.links.twitter}>
+          <Link isExternal aria-label="X" href={siteConfig.links.twitter}>
             <TwitterIcon className="text-default-500" />
           </Link>
           <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>

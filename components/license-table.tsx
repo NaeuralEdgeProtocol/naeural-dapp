@@ -438,7 +438,7 @@ export default function LicenseTable() {
                 {selectedLicense && (
                   <>
                     <p>
-                      <strong>License ID:</strong> #{selectedLicense.id}
+                      <strong>ID:</strong> #{selectedLicense.id}
                     </p>
                     <Snippet size="sm" symbol="">
                       {selectedLicense.nodeHash || "Not assigned"}

@@ -2,7 +2,8 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "NAEURAL | The Neural Edge Protocol",
-  description: "The first Operating System (OS) for Artificial Intelligence (AI) powered by AI and blockchain technologies",
+  description:
+    "The first Operating System (OS) for Artificial Intelligence (AI) powered by AI and blockchain technologies",
   navItems: [],
   navMenuItems: [
     {
@@ -39,10 +40,10 @@ export const siteConfig = {
     },
   ],
   links: {
-    github: "https://github.com/nextui-org/nextui",
-    twitter: "https://twitter.com/getnextui",
+    github: "https://github.com/NaeuralEdgeProtocol",
+    twitter: "https://x.com/NaeuralAI",
     docs: "https://nextui.org",
-    discord: "https://discord.gg/9b6yyZKmH4",
+    discord: "https://discord.gg/HrjjqvYZKD",
     sponsor: "https://patreon.com/jrgarciadev",
   },
 };
