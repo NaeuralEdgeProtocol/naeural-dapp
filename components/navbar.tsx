@@ -37,7 +37,6 @@ import {
   MetamaskIcon,
 } from "@/components/icons";
 import { IconWrapper } from "@/components/icon-wrapper";
-import { ListboxWrapper } from "@/components/listbox-wrapper";
 import { ConnectWalletButton } from "@/components/connect-wallet";
 import { MetaMaskProvider } from "@metamask/sdk-react";
 import { formatAddress } from "../lib/utils";
@@ -67,6 +66,8 @@ export const Navbar = () => {
   );
 
   // @ts-ignore
+  // @ts-ignore
+  // @ts-ignore
   return (
     <NextUINavbar maxWidth="xl" position="sticky">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
@@ -78,22 +79,7 @@ export const Navbar = () => {
             <p className="font-bold text-inherit">NAEURAL</p>
           </NextLink>
         </NavbarBrand>
-        <ul className="hidden lg:flex gap-4 justify-start ml-2">
-          {siteConfig.navItems.map((item) => (
-            <NavbarItem key={item.href}>
-              <NextLink
-                className={clsx(
-                  linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium",
-                )}
-                color="foreground"
-                href={item.href}
-              >
-                {item.label}
-              </NextLink>
-            </NavbarItem>
-          ))}
-        </ul>
+        <ul className="hidden lg:flex gap-4 justify-start ml-2"></ul>
       </NavbarContent>
 
       <NavbarContent

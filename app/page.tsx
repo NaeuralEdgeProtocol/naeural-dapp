@@ -23,6 +23,7 @@ export default function Home() {
   const [currentEpoch, setCurrentEpoch] = useState(0);
 
   const getAccountInfo = async () => {
+    if (!account) return;
     const data = await getAccountData(network, account);
     setNaeuralBalance(data.tokenBalances[1].amount);
     setEthBalance(data.tokenBalances[0].amount);
@@ -54,16 +55,27 @@ export default function Home() {
             value={naeuralBalance}
             subvalue={naeuralBalance * naeuralPrice}
             title="NAEURAL Balance"
+            ctaEnabled={false}
+            ctaText={undefined}
+            ctaLink={undefined}
           />
           <CustomCard
-            icon={<EthIcon />}
+            icon={<EthIcon width={undefined} height={undefined} />}
             value={ethBalance}
             title="ETH Balance"
+            subvalue={undefined}
+            ctaEnabled={false}
+            ctaText={undefined}
+            ctaLink={undefined}
           />
           <CustomCard
-            icon={<HourglassIcon />}
+            icon={<HourglassIcon width={undefined} height={undefined} />}
             value={currentEpoch}
             title="Current Epoch"
+            subvalue={undefined}
+            ctaEnabled={false}
+            ctaText={undefined}
+            ctaLink={undefined}
           />
         </div>
         <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">

@@ -23,6 +23,7 @@ import {
   TableRow,
   useDisclosure,
 } from "@nextui-org/react";
+// @ts-ignore
 import confetti from "canvas-confetti";
 import { Snippet } from "@nextui-org/snippet";
 import { ethers } from "ethers";
@@ -120,6 +121,7 @@ export default function LicenseTable() {
           licenses,
         );
 
+        // @ts-ignore
         newRewards[license.id] = reward;
       }
 
@@ -132,6 +134,7 @@ export default function LicenseTable() {
   }, [licenses, account, network]);
 
   const getLicensesData = async () => {
+    if (!account) return;
     const masterLicenses = await getLicenses(network, "master", account);
     const licenses = await getLicenses(network, "license", account);
 
@@ -139,6 +142,7 @@ export default function LicenseTable() {
   };
 
   const claimRewards = async (licenseList: License[]) => {
+    if (!account) return;
     const masterLicenses = [];
     const publicLicenses = [];
     for (const license of licenseList) {
@@ -188,6 +192,7 @@ export default function LicenseTable() {
   };
 
   const buyLicense = async () => {
+    if (!account) return;
     const transaction = await toast.promise(
       getAddLicenseTransaction(network, "license", account, licensesAmount),
       {
@@ -205,12 +210,14 @@ export default function LicenseTable() {
   };
 
   const registerLicense = async () => {
+    if (!selectedLicense) return;
+    if (!account) return;
     const transaction = await toast.promise(
       getRegisterLicenseTransaction(
         network,
-        selectedLicense?.type,
+        selectedLicense.type,
         account,
-        selectedLicense?.id,
+        selectedLicense.id,
         nodeHash,
       ),
       {
@@ -313,7 +320,7 @@ export default function LicenseTable() {
                   </DropdownItem>
                   <DropdownItem
                     onClick={() => {
-                      claimRewards([license], license.type);
+                      claimRewards([license]);
                     }}
                   >
                     Claim Rewards
@@ -448,6 +455,9 @@ export default function LicenseTable() {
                         icon={<Logo />}
                         value={selectedLicense.currentClaimAmount}
                         title="Redeemed"
+                        ctaEnabled={false}
+                        ctaLink={undefined}
+                        ctaText={undefined}
                       />
                     </div>
                     <div className="flex">
@@ -455,6 +465,9 @@ export default function LicenseTable() {
                         icon={<Logo />}
                         value={selectedLicense.remainingClaimAmount}
                         title="Remaining"
+                        ctaEnabled={false}
+                        ctaLink={undefined}
+                        ctaText={undefined}
                       />
                     </div>
                   </>

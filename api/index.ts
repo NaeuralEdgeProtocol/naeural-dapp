@@ -77,7 +77,7 @@ export const getRegisterLicenseTransaction = async (
   network: string,
   contractType: string,
   address: string,
-  licenseId: number,
+  licenseId: string,
   nodeHash: string,
 ): Promise<any> => {
   const response = await fetch(

@@ -15,7 +15,6 @@ export const Logo: React.FC<IconSvgProps> = ({
     style={{
       shapeRendering: "geometricPrecision",
       textRendering: "geometricPrecision",
-      imageRendering: "optimizeQuality",
       fillRule: "evenodd",
       clipRule: "evenodd",
     }}
@@ -277,7 +276,7 @@ export const WalletIcon = ({
   </svg>
 );
 
-export const MetamaskIcon = ({
+export const MetamaskIcon: React.FC<IconSvgProps> = ({
   size = 24,
   width,
   height,
@@ -488,29 +487,39 @@ export const NextUILogo: React.FC<IconSvgProps> = (props) => {
   );
 };
 
-export const PlusIcon = ({ size = 24, width, height, ...props }) => (
-  <svg
-    aria-hidden="true"
-    fill="none"
-    focusable="false"
-    height={size || height}
-    role="presentation"
-    viewBox="0 0 24 24"
-    width={size || width}
-    {...props}
-  >
-    <g
+export const PlusIcon: React.FC<IconSvgProps> = ({
+  size = 24,
+  width,
+  height,
+  ...props
+}) => {
+  const svgWidth = width || size;
+  const svgHeight = height || size;
+
+  return (
+    <svg
+      aria-hidden="true"
       fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={1.5}
+      focusable="false"
+      height={svgHeight}
+      role="presentation"
+      viewBox="0 0 24 24"
+      width={svgWidth}
+      {...props}
     >
-      <path d="M6 12h12" />
-      <path d="M12 18V6" />
-    </g>
-  </svg>
-);
+      <g
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+      >
+        <path d="M6 12h12" />
+        <path d="M12 18V6" />
+      </g>
+    </svg>
+  );
+};
 
 export const ChevronDownIcon = ({ strokeWidth = 1.5, ...otherProps }) => (
   <svg
@@ -534,29 +543,10 @@ export const ChevronDownIcon = ({ strokeWidth = 1.5, ...otherProps }) => (
   </svg>
 );
 
-export const VerticalDotsIcon = ({ size = 24, width, height, ...props }) => (
-  <svg
-    aria-hidden="true"
-    fill="none"
-    focusable="false"
-    height={size || height}
-    role="presentation"
-    viewBox="0 0 24 24"
-    width={size || width}
-    {...props}
-  >
-    <path
-      d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
-      fill="currentColor"
-    />
-  </svg>
-);
-
-export const EthIcon = ({
+export const VerticalDotsIcon: React.FC<IconSvgProps> = ({
   size = 24,
   width,
   height,
-  className = "",
   ...props
 }) => {
   const svgWidth = width || size;
@@ -565,14 +555,40 @@ export const EthIcon = ({
   return (
     <svg
       aria-hidden="true"
-      className={`text-current ${className}`}
       fill="none"
       focusable="false"
       height={svgHeight}
       role="presentation"
       viewBox="0 0 24 24"
       width={svgWidth}
-      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+};
+
+export const EthIcon: React.FC<IconSvgProps> = ({
+  size = 24,
+  width,
+  height,
+  ...props
+}) => {
+  const svgWidth = width || size;
+  const svgHeight = height || size;
+
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      focusable="false"
+      height={svgHeight}
+      role="presentation"
+      viewBox="0 0 24 24"
+      width={svgWidth}
       {...props}
     >
       <path
@@ -591,11 +607,10 @@ export const EthIcon = ({
   );
 };
 
-export const HourglassIcon = ({
+export const HourglassIcon: React.FC<IconSvgProps> = ({
   size = 24,
   width,
   height,
-  className = "",
   ...props
 }) => {
   const svgWidth = width || size;
@@ -604,14 +619,12 @@ export const HourglassIcon = ({
   return (
     <svg
       aria-hidden="true"
-      className={`text-current ${className}`}
       fill="none"
       focusable="false"
       height={svgHeight}
       role="presentation"
       viewBox="0 0 24 24"
       width={svgWidth}
-      xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
       <path
@@ -624,39 +637,10 @@ export const HourglassIcon = ({
   );
 };
 
-export const EyeIcon = (props) => (
-  <svg
-    aria-hidden="true"
-    fill="none"
-    focusable="false"
-    height="1em"
-    role="presentation"
-    viewBox="0 0 20 20"
-    width="1em"
-    {...props}
-  >
-    <path
-      d="M12.9833 10C12.9833 11.65 11.65 12.9833 10 12.9833C8.35 12.9833 7.01666 11.65 7.01666 10C7.01666 8.35 8.35 7.01666 10 7.01666C11.65 7.01666 12.9833 8.35 12.9833 10Z"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={1.5}
-    />
-    <path
-      d="M9.99999 16.8916C12.9417 16.8916 15.6833 15.1583 17.5917 12.1583C18.3417 10.9833 18.3417 9.00831 17.5917 7.83331C15.6833 4.83331 12.9417 3.09998 9.99999 3.09998C7.05833 3.09998 4.31666 4.83331 2.40833 7.83331C1.65833 9.00831 1.65833 10.9833 2.40833 12.1583C4.31666 15.1583 7.05833 16.8916 9.99999 16.8916Z"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={1.5}
-    />
-  </svg>
-);
-
-export const CoinsIcon = ({
+export const EyeIcon: React.FC<IconSvgProps> = ({
   size = 24,
   width,
   height,
-  className = "",
   ...props
 }) => {
   const svgWidth = width || size;
@@ -665,14 +649,49 @@ export const CoinsIcon = ({
   return (
     <svg
       aria-hidden="true"
-      className={`text-current ${className}`}
       fill="none"
       focusable="false"
       height={svgHeight}
       role="presentation"
       viewBox="0 0 24 24"
       width={svgWidth}
-      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M12.9833 10C12.9833 11.65 11.65 12.9833 10 12.9833C8.35 12.9833 7.01666 11.65 7.01666 10C7.01666 8.35 8.35 7.01666 10 7.01666C11.65 7.01666 12.9833 8.35 12.9833 10Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+      />
+      <path
+        d="M9.99999 16.8916C12.9417 16.8916 15.6833 15.1583 17.5917 12.1583C18.3417 10.9833 18.3417 9.00831 17.5917 7.83331C15.6833 4.83331 12.9417 3.09998 9.99999 3.09998C7.05833 3.09998 4.31666 4.83331 2.40833 7.83331C1.65833 9.00831 1.65833 10.9833 2.40833 12.1583C4.31666 15.1583 7.05833 16.8916 9.99999 16.8916Z"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+      />
+    </svg>
+  );
+};
+export const CoinsIcon: React.FC<IconSvgProps> = ({
+  size = 24,
+  width,
+  height,
+  ...props
+}) => {
+  const svgWidth = width || size;
+  const svgHeight = height || size;
+
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      focusable="false"
+      height={svgHeight}
+      role="presentation"
+      viewBox="0 0 24 24"
+      width={svgWidth}
       {...props}
     >
       <path
@@ -686,11 +705,10 @@ export const CoinsIcon = ({
   );
 };
 
-export const LinkIcon = ({
+export const LinkIcon: React.FC<IconSvgProps> = ({
   size = 24,
   width,
   height,
-  className = "",
   ...props
 }) => {
   const svgWidth = width || size;
@@ -699,14 +717,12 @@ export const LinkIcon = ({
   return (
     <svg
       aria-hidden="true"
-      className={`text-current ${className}`}
       fill="none"
       focusable="false"
       height={svgHeight}
       role="presentation"
       viewBox="0 0 24 24"
       width={svgWidth}
-      xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
       <path
@@ -719,11 +735,10 @@ export const LinkIcon = ({
   );
 };
 
-export const CrownIcon = ({
+export const CrownIcon: React.FC<IconSvgProps> = ({
   size = 24,
   width,
   height,
-  className = "",
   ...props
 }) => {
   const svgWidth = width || size;
@@ -732,14 +747,12 @@ export const CrownIcon = ({
   return (
     <svg
       aria-hidden="true"
-      className={`text-current ${className}`}
       fill="none"
       focusable="false"
       height={svgHeight}
       role="presentation"
       viewBox="0 0 24 24"
       width={svgWidth}
-      xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
       <path
