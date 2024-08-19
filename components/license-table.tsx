@@ -26,7 +26,7 @@ import {
 // @ts-ignore
 import confetti from "canvas-confetti";
 import { Snippet } from "@nextui-org/snippet";
-import { ethers } from "ethers";
+import { ethers, Network } from "ethers";
 import { useSDK } from "@metamask/sdk-react";
 
 import { useNetwork } from "@/context/network-provider";
@@ -105,7 +105,7 @@ export default function LicenseTable() {
 
       return () => clearInterval(intervalId);
     }
-  }, []);
+  }, [account, network]);
 
   useEffect(() => {
     const fetchRewards = async () => {

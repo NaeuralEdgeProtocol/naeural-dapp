@@ -1,6 +1,6 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useContext, ReactNode } from "react";
 
-export type Network = "ethereum" | "arbitrum";
+export type Network = "sepolia" | "arbitrum";
 
 const NetworkContext = createContext<
   | {
@@ -21,7 +21,7 @@ export function useNetwork() {
 }
 
 export function NetworkProvider({ children }: { children: ReactNode }) {
-  const [network, setNetwork] = useState<Network>('arbitrum');
+  const [network, setNetwork] = useState<Network>("arbitrum");
 
   return (
     <NetworkContext.Provider value={{ network, setNetwork }}>

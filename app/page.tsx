@@ -25,6 +25,9 @@ export default function Home() {
   const getAccountInfo = async () => {
     if (!account) return;
     const data = await getAccountData(network, account);
+
+    if (data.statusCode !== 200) return;
+
     setNaeuralBalance(data.tokenBalances[1].amount);
     setEthBalance(data.tokenBalances[0].amount);
     setCurrentEpoch(data.currentEpoch);
@@ -36,7 +39,7 @@ export default function Home() {
     } else {
       setLoading(false);
     }
-  }, [connected]);
+  }, [connected, network]);
 
   if (loading) {
     return (

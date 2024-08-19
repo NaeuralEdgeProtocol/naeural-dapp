@@ -40,6 +40,7 @@ import { IconWrapper } from "@/components/icon-wrapper";
 import { ConnectWalletButton } from "@/components/connect-wallet";
 import { MetaMaskProvider } from "@metamask/sdk-react";
 import { formatAddress } from "../lib/utils";
+import NetworkSelector from "@/components/network-selector";
 
 export const Navbar = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -98,7 +99,9 @@ export const Navbar = () => {
           </Link>
           <ThemeSwitch />
         </NavbarItem>
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
+        <NavbarItem className="hidden lg:flex">
+          <NetworkSelector />
+        </NavbarItem>
         <NavbarItem className="hidden md:flex">
           <ConnectWalletButton />
         </NavbarItem>
