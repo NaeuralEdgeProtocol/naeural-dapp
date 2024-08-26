@@ -17,7 +17,7 @@ export default function NetworkSelector() {
       <Select
         className="max-w-xs"
         selectedKeys={[value]}
-        size={"xs"}
+        size={undefined}
         onSelectionChange={handleSelectionChange}
       >
         <SelectItem key="arbitrum">Arbitrum</SelectItem>
