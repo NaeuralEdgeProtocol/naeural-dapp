@@ -112,20 +112,20 @@ export default function LicenseTable() {
       if (!account) {
         return;
       }
-      // const newRewards = {};
-      // for (const license of licenses) {
-      //   const reward = await getEstimateRewards(
-      //     network,
-      //     "license",
-      //     account,
-      //     licenses,
-      //   );
-      //
-      //   // @ts-ignore
-      //   newRewards[license.id] = reward;
-      // }
-      //
-      // setRewards(newRewards);
+      const newRewards = {};
+      for (const license of licenses) {
+        const reward = await getEstimateRewards(
+          network,
+          "license",
+          account,
+          licenses,
+        );
+
+        // @ts-ignore
+        newRewards[license.id] = reward;
+      }
+
+      setRewards(newRewards);
     };
 
     if (account && licenses.length > 0) {
