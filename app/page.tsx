@@ -15,22 +15,21 @@ import { FiTriangle } from "react-icons/fi";
 export default function Home() {
   const { network } = useNetwork();
   const { connected, account } = useSDK();
-  const naeuralPrice = 0.02;
 
   const [loading, setLoading] = useState(true);
   const [naeuralBalance, setNaeuralBalance] = useState(0);
   const [ethBalance, setEthBalance] = useState(0);
   const [currentEpoch, setCurrentEpoch] = useState(0);
+  const [naeuralPrice, setNaeuralPrice] = useState(0);
 
   const getAccountInfo = async () => {
     if (!account) return;
     const data = await getAccountData(network, account);
 
-    if (data.statusCode !== 200) return;
-
     setNaeuralBalance(data.tokenBalances[1].amount);
     setEthBalance(data.tokenBalances[0].amount);
     setCurrentEpoch(data.currentEpoch);
+    setNaeuralPrice(data.tokenPrice);
   };
 
   useEffect(() => {
