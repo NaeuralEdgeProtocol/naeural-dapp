@@ -26,8 +26,11 @@ import {
 // @ts-ignore
 import confetti from "canvas-confetti";
 import { Snippet } from "@nextui-org/snippet";
-import { ethers, Network } from "ethers";
+import { ethers } from "ethers";
 import { useSDK } from "@metamask/sdk-react";
+import { toast } from "react-toastify";
+import { Chip } from "@nextui-org/chip";
+import { FiChevronsUp } from "react-icons/fi";
 
 import { useNetwork } from "@/context/network-provider";
 import {
@@ -35,9 +38,7 @@ import {
   PublicLicenseIcon,
   MasterLicenseIcon,
   VerticalDotsIcon,
-  EthIcon,
   Logo,
-  PowerIcon,
 } from "@/components/icons";
 import {
   getAddLicenseTransaction,
@@ -49,10 +50,7 @@ import {
 } from "@/api";
 import { License } from "@/types/license";
 import { CustomCard } from "@/components/custom-card";
-import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Chip } from "@nextui-org/chip";
-import { FiChevronsUp } from "react-icons/fi";
 
 const columns = [
   { name: "LICENSE", uid: "id", sortable: true },
@@ -65,7 +63,12 @@ const columns = [
 export default function LicenseTable() {
   const { network } = useNetwork();
   const { account } = useSDK();
-  const [rewards, setRewards] = useState<{ [key: string]: number }>({});
+  const [masterRewards, setMasterRewards] = useState<{ [key: string]: number }>(
+    {},
+  );
+  const [licenseRewards, setLicenseRewards] = useState<{
+    [key: string]: number;
+  }>({});
 
   const {
     isOpen: isRegisterOpen,
@@ -101,7 +104,7 @@ export default function LicenseTable() {
     if (account) {
       getLicensesData();
 
-      const intervalId = setInterval(getLicensesData, 5000); // Update every 5 seconds
+      const intervalId = setInterval(getLicensesData, 30000); // Update every 5 seconds
 
       return () => clearInterval(intervalId);
     }
@@ -112,20 +115,71 @@ export default function LicenseTable() {
       if (!account) {
         return;
       }
-      const newRewards = {};
+
+      const masterLicenses = [];
+      const publicLicenses = [];
+
       for (const license of licenses) {
-        const reward = await getEstimateRewards(
+        if (license.type === "license") {
+          publicLicenses.push(license);
+        } else {
+          masterLicenses.push(license);
+        }
+      }
+
+      if (publicLicenses.length > 0) {
+        const newLicenseRewards = {};
+        const licenseRewards = await getEstimateRewards(
           network,
           "license",
           account,
-          licenses,
+          publicLicenses,
         );
 
-        // @ts-ignore
-        newRewards[license.id] = reward;
+        if (licenseRewards.statusCode === 500 || licenseRewards.length === 0) {
+          for (const publicLicense of publicLicenses) {
+            // @ts-ignore
+            newLicenseRewards[publicLicense.id] = 0;
+          }
+          setLicenseRewards(newLicenseRewards);
+
+          return;
+        }
+
+        for (const licenseReward of licenseRewards) {
+          // @ts-ignore
+          newLicenseRewards[licenseReward.licenseId] = licenseReward.rewards;
+        }
+
+        setLicenseRewards(newLicenseRewards);
       }
 
-      setRewards(newRewards);
+      if (masterLicenses.length > 0) {
+        const newMasterRewards = {};
+        const masterRewards = await getEstimateRewards(
+          network,
+          "master",
+          account,
+          masterLicenses,
+        );
+
+        if (masterRewards.statusCode === 500 || masterRewards.length === 0) {
+          for (const masterLicense of masterLicenses) {
+            // @ts-ignore
+            newMasterRewards[masterLicense.id] = 0;
+          }
+          setMasterRewards(newMasterRewards);
+
+          return;
+        }
+
+        for (const masterReward of masterRewards) {
+          // @ts-ignore
+          newMasterRewards[masterReward.licenseId] = masterReward.rewards;
+        }
+
+        setMasterRewards(newMasterRewards);
+      }
     };
 
     if (account && licenses.length > 0) {
@@ -145,6 +199,7 @@ export default function LicenseTable() {
     if (!account) return;
     const masterLicenses = [];
     const publicLicenses = [];
+
     for (const license of licenseList) {
       if (license.type === "license") {
         publicLicenses.push(license);
@@ -254,10 +309,10 @@ export default function LicenseTable() {
                 {license.nodePower && (
                   <Chip
                     className="ml-2"
+                    color="success"
                     size="sm"
                     startContent={<FiChevronsUp />}
                     variant="faded"
-                    color="success"
                   >
                     {license.nodePower}x
                   </Chip>
@@ -291,8 +346,16 @@ export default function LicenseTable() {
         case "estimateRewards":
           return (
             <div>
-              {license.id in rewards ? (
-                rewards[license.id]
+              {license.type === "master" ? (
+                license.id in masterRewards ? (
+                  masterRewards[license.id]
+                ) : (
+                  <Skeleton className="w-2/5 rounded-lg">
+                    <div className="h-3 w-2/5 rounded-lg bg-default-300" />
+                  </Skeleton>
+                )
+              ) : license.id in licenseRewards ? (
+                licenseRewards[license.id]
               ) : (
                 <Skeleton className="w-2/5 rounded-lg">
                   <div className="h-3 w-2/5 rounded-lg bg-default-300" />
@@ -324,6 +387,14 @@ export default function LicenseTable() {
                     }}
                   >
                     Claim Rewards
+                  </DropdownItem>
+                  <DropdownItem
+                    onClick={() => {
+                      setSelectedLicense(license);
+                      onRegisterOpen();
+                    }}
+                  >
+                    Register License
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
@@ -452,22 +523,22 @@ export default function LicenseTable() {
                     </Snippet>
                     <div className="flex">
                       <CustomCard
-                        icon={<Logo />}
-                        value={selectedLicense.currentClaimAmount}
-                        title="Redeemed"
                         ctaEnabled={false}
                         ctaLink={undefined}
                         ctaText={undefined}
+                        icon={<Logo />}
+                        title="Redeemed"
+                        value={selectedLicense.currentClaimAmount}
                       />
                     </div>
                     <div className="flex">
                       <CustomCard
-                        icon={<Logo />}
-                        value={selectedLicense.remainingClaimAmount}
-                        title="Remaining"
                         ctaEnabled={false}
                         ctaLink={undefined}
                         ctaText={undefined}
+                        icon={<Logo />}
+                        title="Remaining"
+                        value={selectedLicense.remainingClaimAmount}
                       />
                     </div>
                   </>
