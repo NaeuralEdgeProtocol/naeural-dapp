@@ -41,6 +41,7 @@ import {
   Logo,
 } from "@/components/icons";
 import {
+  approve,
   getAddLicenseTransaction,
   getClaimRewardsTransaction,
   getEstimateRewards,
@@ -96,8 +97,9 @@ export default function LicenseTable() {
   const provider = new ethers.BrowserProvider(window.ethereum);
   const handleLicensePrice = async (amount: number) => {
     const price = await getLicensePrice(network, "license");
+    console.log(price);
 
-    setLicensePrice(price * amount * 100);
+    setLicensePrice(price * amount);
   };
 
   useEffect(() => {
@@ -248,7 +250,25 @@ export default function LicenseTable() {
 
   const buyLicense = async () => {
     if (!account) return;
-    const transaction = await toast.promise(
+    const approvalTransaction = await toast.promise(
+      approve(network, licensesAmount, account),
+      {
+        pending: "Preparing transaction...",
+        success: "Transaction prepared 👌",
+        error: "Failed to prepare transaction 🤯",
+      },
+    );
+
+    await toast.promise(
+      provider.send("eth_sendTransaction", [approvalTransaction]),
+      {
+        pending: "Approving transaction",
+        success: "Transaction successfully approved 👌",
+        error: "Something went wrong. Please try again 🤯",
+      },
+    );
+
+    const buyTransaction = await toast.promise(
       getAddLicenseTransaction(network, "license", account, licensesAmount),
       {
         pending: "Preparing transaction...",
@@ -257,11 +277,14 @@ export default function LicenseTable() {
       },
     );
 
-    await toast.promise(provider.send("eth_sendTransaction", [transaction]), {
-      pending: "Buying license",
-      success: "License successfully bought 👌",
-      error: "Something went wrong. Please try again 🤯",
-    });
+    await toast.promise(
+      provider.send("eth_sendTransaction", [buyTransaction]),
+      {
+        pending: "Buying license",
+        success: "License successfully bought 👌",
+        error: "Something went wrong. Please try again 🤯",
+      },
+    );
   };
 
   const registerLicense = async () => {

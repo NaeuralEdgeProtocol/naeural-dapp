@@ -73,6 +73,19 @@ export const getAddLicenseTransaction = async (
   return await response.json();
 };
 
+export const approve = async (
+  network: string,
+  amount: number,
+  address: string,
+): Promise<any> => {
+  const response = await fetch(
+    process.env.NEXT_PUBLIC_GATEWAY_URL +
+      `/accounts/${network}/approve/${amount}?address=${address}`,
+  );
+
+  return await response.json();
+};
+
 export const getRegisterLicenseTransaction = async (
   network: string,
   contractType: string,
