@@ -1,22 +1,25 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Network, useNetwork } from "@/context/network-provider";
 import { Select, SelectItem } from "@nextui-org/select";
 
 export default function NetworkSelector() {
   const { network, setNetwork } = useNetwork();
-  const [value, setValue] = React.useState<Network>("arbitrum");
 
-  const handleSelectionChange = (keys: Set<React.Key>) => {
-    const selectedValue = Array.from(keys).pop() as Network;
-    setValue(selectedValue);
-    setNetwork(selectedValue);
+  const handleSelectionChange = async (keys: Set<React.Key>) => {
+    try {
+      const selectedValue = Array.from(keys).pop() as Network;
+      await setNetwork(selectedValue);
+    } catch (error) {
+      // Error handling is done in the provider
+      console.error("Network switch failed:", error);
+    }
   };
 
   return (
     <div className="w-[145px]">
       <Select
         className="max-w-xs"
-        selectedKeys={[value]}
+        selectedKeys={[network]}
         size={undefined}
         onSelectionChange={handleSelectionChange}
       >

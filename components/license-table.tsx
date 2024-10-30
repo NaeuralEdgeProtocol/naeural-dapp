@@ -23,7 +23,6 @@ import {
   TableRow,
   useDisclosure,
 } from "@nextui-org/react";
-// @ts-ignore
 import confetti from "canvas-confetti";
 import { Snippet } from "@nextui-org/snippet";
 import { ethers } from "ethers";
@@ -60,10 +59,20 @@ const columns = [
   { name: "", uid: "actions" },
 ];
 
+interface LicenseTableProps {
+  naeuralPrice: number;
+}
+
 // @ts-ignore
-export default function LicenseTable() {
+export default function LicenseTable({ naeuralPrice }: LicenseTableProps) {
   const { network } = useNetwork();
   const { account } = useSDK();
+
+  const [isLoadingLicenses, setIsLoadingLicenses] = useState(true);
+  const [isLoadingRewards, setIsLoadingRewards] = useState(true);
+  const [isClaimingRewards, setIsClaimingRewards] = useState(false);
+  const [isBuyingLicense, setIsBuyingLicense] = useState(false);
+
   const [masterRewards, setMasterRewards] = useState<{ [key: string]: number }>(
     {},
   );
@@ -95,29 +104,42 @@ export default function LicenseTable() {
 
   // @ts-ignore
   const provider = new ethers.BrowserProvider(window.ethereum);
-  const handleLicensePrice = async (amount: number) => {
-    const price = await getLicensePrice(network, "license");
-    console.log(price);
 
-    setLicensePrice(price * amount);
+  const getLicensesData = async () => {
+    if (!account) return;
+    setIsLoadingLicenses(true);
+    try {
+      const masterLicenses = await getLicenses(network, "master", account);
+      const licenses = await getLicenses(network, "license", account);
+      setLicenses([...masterLicenses, ...licenses]);
+    } catch (error) {
+      console.error("Failed to fetch licenses:", error);
+      toast.error("Failed to fetch licenses");
+    } finally {
+      setIsLoadingLicenses(false);
+    }
+  };
+
+  const calculateNaeuralAmount = (usdPrice: number) => {
+    return naeuralPrice ? Math.ceil(usdPrice / naeuralPrice) : 0;
   };
 
   useEffect(() => {
     if (account) {
       getLicensesData();
-
-      const intervalId = setInterval(getLicensesData, 30000); // Update every 5 seconds
-
+      const intervalId = setInterval(getLicensesData, 30000);
       return () => clearInterval(intervalId);
     }
   }, [account, network]);
 
-  useEffect(() => {
-    const fetchRewards = async () => {
-      if (!account) {
-        return;
-      }
+  const fetchRewards = async () => {
+    if (!account || licenses.length === 0) {
+      setIsLoadingRewards(false);
+      return;
+    }
 
+    setIsLoadingRewards(true);
+    try {
       const masterLicenses = [];
       const publicLicenses = [];
 
@@ -143,16 +165,12 @@ export default function LicenseTable() {
             // @ts-ignore
             newLicenseRewards[publicLicense.id] = 0;
           }
-          setLicenseRewards(newLicenseRewards);
-
-          return;
+        } else {
+          for (const licenseReward of licenseRewards) {
+            // @ts-ignore
+            newLicenseRewards[licenseReward.licenseId] = licenseReward.rewards;
+          }
         }
-
-        for (const licenseReward of licenseRewards) {
-          // @ts-ignore
-          newLicenseRewards[licenseReward.licenseId] = licenseReward.rewards;
-        }
-
         setLicenseRewards(newLicenseRewards);
       }
 
@@ -170,146 +188,214 @@ export default function LicenseTable() {
             // @ts-ignore
             newMasterRewards[masterLicense.id] = 0;
           }
-          setMasterRewards(newMasterRewards);
-
-          return;
+        } else {
+          for (const masterReward of masterRewards) {
+            // @ts-ignore
+            newMasterRewards[masterReward.licenseId] = masterReward.rewards;
+          }
         }
-
-        for (const masterReward of masterRewards) {
-          // @ts-ignore
-          newMasterRewards[masterReward.licenseId] = masterReward.rewards;
-        }
-
         setMasterRewards(newMasterRewards);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch rewards:", error);
+      toast.error("Failed to fetch rewards estimates");
+    } finally {
+      setIsLoadingRewards(false);
+    }
+  };
 
+  useEffect(() => {
     if (account && licenses.length > 0) {
       fetchRewards();
     }
   }, [licenses, account, network]);
 
-  const getLicensesData = async () => {
-    if (!account) return;
-    const masterLicenses = await getLicenses(network, "master", account);
-    const licenses = await getLicenses(network, "license", account);
-
-    setLicenses([...masterLicenses, ...licenses]);
+  const handleLicensePrice = async (amount: number) => {
+    try {
+      const price = await getLicensePrice(network, "license");
+      setLicensePrice(price * amount);
+    } catch (error) {
+      console.error("Failed to get license price:", error);
+      toast.error("Failed to fetch license price");
+    }
   };
 
   const claimRewards = async (licenseList: License[]) => {
-    if (!account) return;
-    const masterLicenses = [];
-    const publicLicenses = [];
+    if (!account || isClaimingRewards) return;
 
-    for (const license of licenseList) {
-      if (license.type === "license") {
-        publicLicenses.push(license);
-      } else {
-        masterLicenses.push(license);
+    setIsClaimingRewards(true);
+    try {
+      const masterLicenses = [];
+      const publicLicenses = [];
+
+      for (const license of licenseList) {
+        if (license.type === "license") {
+          publicLicenses.push(license);
+        } else {
+          masterLicenses.push(license);
+        }
       }
-    }
 
-    if (masterLicenses.length > 0) {
-      const masterTransaction = await toast.promise(
-        getClaimRewardsTransaction(network, "master", account, licenseList),
-        {
-          pending: "Preparing transaction...",
-          success: "Transaction prepared 👌",
-          error: "Failed to prepare transaction 🤯",
-        },
-      );
+      if (masterLicenses.length > 0) {
+        const masterTransaction = await toast.promise(
+          getClaimRewardsTransaction(
+            network,
+            "master",
+            account,
+            masterLicenses,
+          ),
+          {
+            pending: "Preparing master rewards transaction...",
+            success: "Transaction prepared 👌",
+            error: "Failed to prepare transaction 🤯",
+          },
+        );
 
-      await toast.promise(
-        provider.send("eth_sendTransaction", [masterTransaction]),
-        {
-          pending: "Claiming master rewards",
-          success: "Rewards successfully claimed 👌",
-          error: "Something went wrong. Please try again 🤯",
-        },
-      );
-    }
+        await toast.promise(
+          provider.send("eth_sendTransaction", [masterTransaction]),
+          {
+            pending: "Claiming master rewards...",
+            success: "Master rewards claimed successfully 👌",
+            error: "Failed to claim master rewards 🤯",
+          },
+        );
+      }
 
-    if (publicLicenses.length > 0) {
-      const transaction = await toast.promise(
-        getClaimRewardsTransaction(network, "license", account, licenseList),
-        {
-          pending: "Preparing transaction...",
-          success: "Transaction prepared 👌",
-          error: "Failed to prepare transaction 🤯",
-        },
-      );
+      if (publicLicenses.length > 0) {
+        const transaction = await toast.promise(
+          getClaimRewardsTransaction(
+            network,
+            "license",
+            account,
+            publicLicenses,
+          ),
+          {
+            pending: "Preparing license rewards transaction...",
+            success: "Transaction prepared 👌",
+            error: "Failed to prepare transaction 🤯",
+          },
+        );
 
-      await toast.promise(provider.send("eth_sendTransaction", [transaction]), {
-        pending: "Claiming rewards",
-        success: "Rewards successfully claimed 👌",
-        error: "Something went wrong. Please try again 🤯",
-      });
+        await toast.promise(
+          provider.send("eth_sendTransaction", [transaction]),
+          {
+            pending: "Claiming license rewards...",
+            success: "License rewards claimed successfully 👌",
+            error: "Failed to claim license rewards 🤯",
+          },
+        );
+      }
+
+      await fetchRewards();
+      confetti();
+    } catch (error) {
+      console.error("Failed to claim rewards:", error);
+      toast.error("Failed to claim rewards");
+    } finally {
+      setIsClaimingRewards(false);
     }
   };
 
   const buyLicense = async () => {
-    if (!account) return;
-    const approvalTransaction = await toast.promise(
-      approve(network, licensesAmount, account),
-      {
-        pending: "Preparing transaction...",
-        success: "Transaction prepared 👌",
-        error: "Failed to prepare transaction 🤯",
-      },
-    );
+    if (!account || isBuyingLicense) return;
 
-    await toast.promise(
-      provider.send("eth_sendTransaction", [approvalTransaction]),
-      {
-        pending: "Approving transaction",
-        success: "Transaction successfully approved 👌",
-        error: "Something went wrong. Please try again 🤯",
-      },
-    );
+    setIsBuyingLicense(true);
+    const toastId = toast.loading("Preparing transactions...");
 
-    const buyTransaction = await toast.promise(
-      getAddLicenseTransaction(network, "license", account, licensesAmount),
-      {
-        pending: "Preparing transaction...",
-        success: "Transaction prepared 👌",
-        error: "Failed to prepare transaction 🤯",
-      },
-    );
+    try {
+      // Step 1: Approval Transaction
+      const approvalTransaction = await approve(
+        network,
+        licensesAmount,
+        account,
+      );
 
-    await toast.promise(
-      provider.send("eth_sendTransaction", [buyTransaction]),
-      {
-        pending: "Buying license",
-        success: "License successfully bought 👌",
-        error: "Something went wrong. Please try again 🤯",
-      },
-    );
+      toast.update(toastId, {
+        render: "Confirming approval transaction...",
+        isLoading: true,
+      });
+
+      // Wait for approval transaction to complete
+      const approvalReceipt = await provider.send("eth_sendTransaction", [
+        approvalTransaction,
+      ]);
+
+      // Wait for one block confirmation
+      await provider.waitForTransaction(approvalReceipt);
+
+      toast.update(toastId, {
+        render: "Approval confirmed. Preparing buy transaction...",
+        isLoading: true,
+      });
+
+      // Step 2: Buy Transaction
+      const buyTransaction = await getAddLicenseTransaction(
+        network,
+        "license",
+        account,
+        licensesAmount,
+      );
+
+      toast.update(toastId, {
+        render: "Confirming buy transaction...",
+        isLoading: true,
+      });
+
+      await provider.send("eth_sendTransaction", [buyTransaction]);
+
+      toast.update(toastId, {
+        render: "License purchased successfully! 👌",
+        type: "success",
+        isLoading: false,
+        autoClose: 5000,
+      });
+
+      await getLicensesData();
+      onBuyOpenChange();
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      toast.update(toastId, {
+        render: error.message || "Failed to complete transaction",
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+      });
+    } finally {
+      setIsBuyingLicense(false);
+    }
   };
 
   const registerLicense = async () => {
-    if (!selectedLicense) return;
-    if (!account) return;
-    const transaction = await toast.promise(
-      getRegisterLicenseTransaction(
-        network,
-        selectedLicense.type,
-        account,
-        selectedLicense.id,
-        nodeHash,
-      ),
-      {
-        pending: "Preparing transaction...",
-        success: "Transaction prepared 👌",
-        error: "Failed to prepare transaction 🤯",
-      },
-    );
+    if (!selectedLicense || !account) return;
 
-    await toast.promise(provider.send("eth_sendTransaction", [transaction]), {
-      pending: "Register license",
-      success: "License successfully registered 👌",
-      error: "Something went wrong. Please try again 🤯",
-    });
+    try {
+      const transaction = await toast.promise(
+        getRegisterLicenseTransaction(
+          network,
+          selectedLicense.type,
+          account,
+          selectedLicense.id,
+          nodeHash,
+        ),
+        {
+          pending: "Preparing registration...",
+          success: "Transaction prepared 👌",
+          error: "Failed to prepare registration 🤯",
+        },
+      );
+
+      await toast.promise(provider.send("eth_sendTransaction", [transaction]), {
+        pending: "Registering license...",
+        success: "License registered successfully 👌",
+        error: "Registration failed 🤯",
+      });
+
+      await getLicensesData();
+      onRegisterOpenChange();
+    } catch (error) {
+      console.error("Failed to register license:", error);
+      toast.error("Failed to register license");
+    }
   };
 
   const renderCell = React.useCallback(
@@ -319,30 +405,29 @@ export default function LicenseTable() {
       switch (columnKey) {
         case "id":
           return (
-            <>
-              <div className="flex z-10 w-full justify-start items-center shrink-0 overflow-inherit color-inherit subpixel-antialiased rounded-t-large gap-2 pb-0">
-                <div className="flex justify-center p-2 rounded-full items-center bg-secondary-100/80 text-pink-500">
-                  {license.type == "master" ? (
-                    <MasterLicenseIcon />
-                  ) : (
-                    <PublicLicenseIcon />
-                  )}
-                </div>
-                #{license.id}
-                {license.nodePower && (
-                  <Chip
-                    className="ml-2"
-                    color="success"
-                    size="sm"
-                    startContent={<FiChevronsUp />}
-                    variant="faded"
-                  >
-                    {license.nodePower}x
-                  </Chip>
+            <div className="flex z-10 w-full justify-start items-center shrink-0 overflow-inherit color-inherit subpixel-antialiased rounded-t-large gap-2 pb-0">
+              <div className="flex justify-center p-2 rounded-full items-center bg-secondary-100/80 text-pink-500">
+                {license.type == "master" ? (
+                  <MasterLicenseIcon />
+                ) : (
+                  <PublicLicenseIcon />
                 )}
               </div>
-            </>
+              #{license.id}
+              {license.nodePower && (
+                <Chip
+                  className="ml-2"
+                  color="success"
+                  size="sm"
+                  startContent={<FiChevronsUp />}
+                  variant="faded"
+                >
+                  {license.nodePower}x
+                </Chip>
+              )}
+            </div>
           );
+
         case "nodeHash":
           if (cellValue) {
             return (
@@ -364,28 +449,23 @@ export default function LicenseTable() {
               </Link>
             );
           }
-        case "lastClaimCycle":
-          return <div>{license.lastClaimCycle}</div>;
+
         case "estimateRewards":
+          if (isLoadingRewards) {
+            return (
+              <Skeleton className="w-2/5 rounded-lg">
+                <div className="h-3 w-2/5 rounded-lg bg-default-300" />
+              </Skeleton>
+            );
+          }
           return (
             <div>
-              {license.type === "master" ? (
-                license.id in masterRewards ? (
-                  masterRewards[license.id]
-                ) : (
-                  <Skeleton className="w-2/5 rounded-lg">
-                    <div className="h-3 w-2/5 rounded-lg bg-default-300" />
-                  </Skeleton>
-                )
-              ) : license.id in licenseRewards ? (
-                licenseRewards[license.id]
-              ) : (
-                <Skeleton className="w-2/5 rounded-lg">
-                  <div className="h-3 w-2/5 rounded-lg bg-default-300" />
-                </Skeleton>
-              )}
+              {license.type === "master"
+                ? masterRewards[license.id] || 0
+                : licenseRewards[license.id] || 0}
             </div>
           );
+
         case "actions":
           return (
             <div className="relative flex justify-end items-center gap-2">
@@ -405,9 +485,8 @@ export default function LicenseTable() {
                     Details
                   </DropdownItem>
                   <DropdownItem
-                    onClick={() => {
-                      claimRewards([license]);
-                    }}
+                    isDisabled={isClaimingRewards}
+                    onClick={() => claimRewards([license])}
                   >
                     Claim Rewards
                   </DropdownItem>
@@ -423,12 +502,27 @@ export default function LicenseTable() {
               </Dropdown>
             </div>
           );
+
         default:
           return cellValue;
       }
     },
-    [licenses],
+    [
+      licenses,
+      isLoadingRewards,
+      isClaimingRewards,
+      masterRewards,
+      licenseRewards,
+    ],
   );
+
+  const hasClaimableRewards = licenses.some((license) => {
+    const rewards =
+      license.type === "master"
+        ? masterRewards[license.id]
+        : licenseRewards[license.id];
+    return rewards > 0;
+  });
 
   const topContent = React.useMemo(() => {
     return (
@@ -438,13 +532,19 @@ export default function LicenseTable() {
           <div className="flex gap-3">
             <Button
               color="success"
+              isDisabled={
+                !licenses.length ||
+                !hasClaimableRewards ||
+                isLoadingRewards ||
+                isClaimingRewards
+              }
               onClick={() => {
                 claimRewards(licenses).then(() => {
                   confetti();
                 });
               }}
             >
-              Claim Rewards
+              {isClaimingRewards ? "Claiming..." : "Claim Rewards"}
             </Button>
             <Button
               color="primary"
@@ -457,7 +557,12 @@ export default function LicenseTable() {
         </div>
       </div>
     );
-  }, [licenses.length]);
+  }, [
+    licenses.length,
+    hasClaimableRewards,
+    isLoadingRewards,
+    isClaimingRewards,
+  ]);
 
   return (
     <>
@@ -594,11 +699,29 @@ export default function LicenseTable() {
                   <Input
                     label="No. of licenses"
                     max="5"
+                    min="1"
                     placeholder="3"
                     type="number"
                     onChange={(e) => {
-                      setLicensesAmount(+e.target.value);
-                      handleLicensePrice(+e.target.value);
+                      const value = parseInt(e.target.value);
+                      if (value >= 1 && value <= 5) {
+                        setLicensesAmount(value);
+                        handleLicensePrice(value);
+                      } else if (e.target.value === "") {
+                        // Handle empty input - reset to 1
+                        setLicensesAmount(1);
+                        handleLicensePrice(1);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (value < 1) {
+                        setLicensesAmount(1);
+                        handleLicensePrice(1);
+                      } else if (value > 5) {
+                        setLicensesAmount(5);
+                        handleLicensePrice(5);
+                      }
                     }}
                   />
                 </div>
@@ -615,7 +738,10 @@ export default function LicenseTable() {
                   }}
                 >
                   {licensePrice ? (
-                    <span>Buy for {licensePrice}$</span>
+                    <span>
+                      Buy for {licensePrice}$ (
+                      {calculateNaeuralAmount(licensePrice)} NAEURAL)
+                    </span>
                   ) : (
                     <span>Buy</span>
                   )}

@@ -32,6 +32,10 @@ export default function Home() {
     setNaeuralPrice(data.tokenPrice);
   };
 
+  const formatNumber = (value: number): string => {
+    return Number(value).toFixed(2);
+  };
+
   useEffect(() => {
     if (account) {
       getAccountInfo().then(() => setLoading(false));
@@ -54,8 +58,8 @@ export default function Home() {
         <div className="flex items-center justify-center gap-3">
           <CustomCard
             icon={<FiTriangle />}
-            value={naeuralBalance}
-            subvalue={naeuralBalance * naeuralPrice}
+            value={formatNumber(naeuralBalance)}
+            subvalue={formatNumber(naeuralBalance * naeuralPrice)}
             title="NAEURAL Balance"
             ctaEnabled={false}
             ctaText={undefined}
@@ -63,7 +67,7 @@ export default function Home() {
           />
           <CustomCard
             icon={<EthIcon width={undefined} height={undefined} />}
-            value={ethBalance}
+            value={formatNumber(ethBalance)}
             title="ETH Balance"
             subvalue={undefined}
             ctaEnabled={false}
@@ -81,7 +85,7 @@ export default function Home() {
           />
         </div>
         <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-          <LicenseTable></LicenseTable>
+          <LicenseTable naeuralPrice={naeuralPrice} />
         </section>
       </>
     );
