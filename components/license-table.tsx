@@ -355,7 +355,7 @@ export default function LicenseTable({ naeuralPrice }: LicenseTableProps) {
     } catch (error) {
       console.error("Transaction failed:", error);
       toast.update(toastId, {
-        render: error.message || "Failed to complete transaction",
+        render: "Failed to complete transaction",
         type: "error",
         isLoading: false,
         autoClose: 5000,
@@ -714,6 +714,7 @@ export default function LicenseTable({ naeuralPrice }: LicenseTableProps) {
                       }
                     }}
                     onBlur={(e) => {
+                      // @ts-ignore
                       const value = parseInt(e.target.value);
                       if (value < 1) {
                         setLicensesAmount(1);

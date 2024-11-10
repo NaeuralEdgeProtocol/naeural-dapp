@@ -56,6 +56,7 @@ export const NetworkProvider = ({
       if (!provider) return;
 
       const chainId = await provider.request({ method: "eth_chainId" });
+      // @ts-ignore
       const currentNetwork = chainIdToNetwork[chainId];
 
       if (currentNetwork) {
@@ -109,6 +110,7 @@ export const NetworkProvider = ({
         await getCurrentNetwork();
 
         // Listen for network changes in MetaMask
+        // @ts-ignore
         provider.on("chainChanged", (chainId: string) => {
           const newNetwork = chainIdToNetwork[chainId];
           if (newNetwork) {
