@@ -6,7 +6,7 @@ export const getLicensePrice = async (
 ): Promise<any> => {
   const response = await fetch(
     process.env.NEXT_PUBLIC_GATEWAY_URL +
-      `/licenses/price/${network}/${contractType}`,
+    `/licenses/price/${network}/${contractType}`,
   );
 
   return await response.json();
@@ -18,7 +18,7 @@ export const getAccountData = async (
 ): Promise<any> => {
   const response = await fetch(
     process.env.NEXT_PUBLIC_GATEWAY_URL +
-      `/accounts/${network}/?address=${address}`,
+    `/accounts/${network}/?address=${address}`,
   );
 
   return await response.json();
@@ -31,7 +31,7 @@ export const getLicenses = async (
 ): Promise<any> => {
   const response = await fetch(
     process.env.NEXT_PUBLIC_GATEWAY_URL +
-      `/licenses/list/${network}/${contractType}/?address=${address}`,
+    `/licenses/list/${network}/${contractType}/?address=${address}`,
   );
 
   return await response.json();
@@ -53,7 +53,7 @@ export const getClaimRewardsTransaction = async (
 
   const response = await fetch(
     process.env.NEXT_PUBLIC_GATEWAY_URL +
-      `/rewards/claim/${network}/${contractType}/?${queryParams.toString()}`,
+    `/rewards/claim/${network}/${contractType}/?${queryParams.toString()}`,
   );
 
   return await response.json();
@@ -67,7 +67,7 @@ export const getAddLicenseTransaction = async (
 ): Promise<any> => {
   const response = await fetch(
     process.env.NEXT_PUBLIC_GATEWAY_URL +
-      `/licenses/create/${network}/${contractType}?address=${address}&amount=${amount}`,
+    `/licenses/create/${network}/${contractType}?address=${address}&amount=${amount}`,
   );
 
   return await response.json();
@@ -80,7 +80,7 @@ export const approve = async (
 ): Promise<any> => {
   const response = await fetch(
     process.env.NEXT_PUBLIC_GATEWAY_URL +
-      `/accounts/${network}/approve/${amount}?address=${address}`,
+    `/accounts/${network}/approve/${amount}?address=${address}`,
   );
 
   return await response.json();
@@ -95,7 +95,22 @@ export const getRegisterLicenseTransaction = async (
 ): Promise<any> => {
   const response = await fetch(
     process.env.NEXT_PUBLIC_GATEWAY_URL +
-      `/licenses/register/${network}/${contractType}/?address=${address}&licenseId=${licenseId}&nodeHash=${nodeHash}`,
+    `/licenses/register/${network}/${contractType}/?address=${address}&licenseId=${licenseId}&nodeHash=${nodeHash}`,
+  );
+
+  return await response.json();
+};
+
+export const getUnRegisterLicenseTransaction = async (
+  network: string,
+  contractType: string,
+  address: string,
+  licenseId: string,
+  nodeHash: string,
+): Promise<any> => {
+  const response = await fetch(
+    process.env.NEXT_PUBLIC_GATEWAY_URL +
+    `/licenses/unregister/${network}/${contractType}/?address=${address}&licenseId=${licenseId}&nodeHash=${nodeHash}`,
   );
 
   return await response.json();
@@ -116,7 +131,7 @@ export const getEstimateRewards = async (
 
   const response = await fetch(
     process.env.NEXT_PUBLIC_GATEWAY_URL +
-      `/rewards/estimate/${network}/${contractType}/?${queryParams.toString()}`,
+    `/rewards/estimate/${network}/${contractType}/?${queryParams.toString()}`,
   );
 
   return await response.json();
