@@ -73,6 +73,8 @@ export default function LicenseTable({ naeuralPrice }: LicenseTableProps) {
   const [isLoadingRewards, setIsLoadingRewards] = useState(true);
   const [isClaimingRewards, setIsClaimingRewards] = useState(false);
   const [isBuyingLicense, setIsBuyingLicense] = useState(false);
+  const [isUnregister, setIsUnregister] = useState(false);
+
 
   const [masterRewards, setMasterRewards] = useState<{ [key: string]: number }>(
     {},
@@ -539,8 +541,8 @@ export default function LicenseTable({ naeuralPrice }: LicenseTableProps) {
                     Register License
                   </DropdownItem>
                   <DropdownItem
-                    isDisabled={isClaimingRewards}
-                    onClick={() => claimRewards([license])}
+                    isDisabled={isUnregister}
+                    onClick={() => unRegisterLicense()}
                   >
                     Unregister Node
                   </DropdownItem>
