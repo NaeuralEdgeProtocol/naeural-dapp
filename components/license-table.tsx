@@ -47,6 +47,7 @@ import {
   getLicensePrice,
   getLicenses,
   getRegisterLicenseTransaction,
+  getUnRegisterLicenseTransaction,
 } from "@/api";
 import { License } from "@/types/license";
 import { CustomCard } from "@/components/custom-card";
@@ -72,6 +73,8 @@ export default function LicenseTable({ naeuralPrice }: LicenseTableProps) {
   const [isLoadingRewards, setIsLoadingRewards] = useState(true);
   const [isClaimingRewards, setIsClaimingRewards] = useState(false);
   const [isBuyingLicense, setIsBuyingLicense] = useState(false);
+  const [isUnregister, setIsUnregister] = useState(false);
+
 
   const [masterRewards, setMasterRewards] = useState<{ [key: string]: number }>(
     {},
@@ -84,6 +87,11 @@ export default function LicenseTable({ naeuralPrice }: LicenseTableProps) {
     isOpen: isRegisterOpen,
     onOpen: onRegisterOpen,
     onOpenChange: onRegisterOpenChange,
+  } = useDisclosure();
+  const {
+    isOpen: isUnRegisterOpen,
+    onOpen: onUnRegisterOpen,
+    onOpenChange: onUnRegisterOpenChange,
   } = useDisclosure();
   const {
     isOpen: isDetailsOpen,
@@ -398,6 +406,40 @@ export default function LicenseTable({ naeuralPrice }: LicenseTableProps) {
     }
   };
 
+
+  const unRegisterLicense = async () => {
+    if (!selectedLicense || !account) return;
+
+    try {
+      const transaction = await toast.promise(
+        getUnRegisterLicenseTransaction(
+          network,
+          selectedLicense.type,
+          account,
+          selectedLicense.id,
+          nodeHash,
+        ),
+        {
+          pending: "Removing Node registration...",
+          success: "Transaction prepared 👌",
+          error: "Failed to remove node registration 🤯",
+        },
+      );
+
+      await toast.promise(provider.send("eth_sendTransaction", [transaction]), {
+        pending: "Removing license registration...",
+        success: "Remove license registeration successfully 👌",
+        error: "Remove license registration failed 🤯",
+      });
+
+      await getLicensesData();
+      onUnRegisterOpenChange();
+    } catch (error) {
+      console.error("Failed to remove license registration:", error);
+      toast.error("Failed to remove license registration");
+    }
+  };
+
   const renderCell = React.useCallback(
     (license: License, columnKey: React.Key) => {
       const cellValue = license[columnKey as keyof License];
@@ -498,6 +540,13 @@ export default function LicenseTable({ naeuralPrice }: LicenseTableProps) {
                   >
                     Register License
                   </DropdownItem>
+                  <DropdownItem
+                    isDisabled={isUnregister}
+                    onClick={() => unRegisterLicense()}
+                  >
+                    Unregister Node
+                  </DropdownItem>
+
                 </DropdownMenu>
               </Dropdown>
             </div>
